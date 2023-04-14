@@ -14,7 +14,7 @@ export interface UploadRequestOptions {
   onProgress: (evt: AxiosProgressEvent) => void
   onSuccess: (response: any) => void
   withCredentials: boolean
-  // 分块上传，每块的大小，<=0则不分块，单位：kb
+  // 分块上传，每块的大小，<=0则不分块
   chunkSize?: number
   // 文件
   file: File | FileChunk
@@ -101,13 +101,13 @@ function uploadFile(options: UploadRequestOptions) {
  */
 async function uploadFileChunk(options: UploadRequestOptions) {
   const rawFile = options.file
-  const chunkSize = (options?.chunkSize || 1) * 1024
-  const chunkTotal = chunkSize > 0 ? Math.ceil(rawFile.size / chunkSize) : 1
+  const chunkSize = options?.chunkSize ?? 0
+  const chunkCount = chunkSize > 0 ? Math.ceil(rawFile.size / chunkSize) : 1
   // 上传总进度
   let progressTotal = 0
   // 上传当前进度
   let progressLoaded = 0
-  for (let i = 0; i < chunkTotal; i++) {
+  for (let i = 0; i < chunkCount; i++) {
     try {
       const chunkStart = i * chunkSize
       const chunkEnd = Math.min(rawFile.size, chunkStart + chunkSize)
@@ -128,6 +128,7 @@ async function uploadFileChunk(options: UploadRequestOptions) {
       })
 
       progressTotal += progressLoaded
+      // 上传完成
       if (progressTotal >= rawFile.size)
         options.onSuccess(res)
     }
@@ -149,12 +150,15 @@ export function upload(options: UploadRequestOptions) {
 
 /**
  * 取消上传
- * @param file 要取消上传的文件
+ * @param files 要取消上传的文件
  */
-export function abort(file: File) {
-  const controller = abortMap.get(file)
-  if (controller) {
-    controller.abort()
-    abortMap.delete(file)
-  }
+export function abort(files: File | File[]) {
+  files = Array.isArray(files) ? files : [files]
+  files.forEach(file => {
+    const controller = abortMap.get(file)
+    if (controller) {
+      controller.abort()
+      abortMap.delete(file)
+    }
+  })
 }
