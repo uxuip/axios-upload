@@ -154,7 +154,7 @@ export function upload(options: UploadRequestOptions) {
  */
 export function abort(files: File | File[]) {
   files = Array.isArray(files) ? files : [files]
-  files.forEach(file => {
+  files.forEach((file) => {
     const controller = abortMap.get(file)
     if (controller) {
       controller.abort()
