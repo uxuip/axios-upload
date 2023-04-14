@@ -17,7 +17,7 @@ export interface UploadRequestOptions {
   // 分块上传，每块的大小，<=0则不分块
   chunkSize?: number
   // 文件
-  file: File | FileChunk
+  file: File
   transformRequest?: AxiosRequestTransformer | AxiosRequestTransformer[]
   transformResponse?: AxiosResponseTransformer | AxiosResponseTransformer[]
 }
