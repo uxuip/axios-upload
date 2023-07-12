@@ -7,13 +7,13 @@ type HeadersType = Headers | AxiosHeaders | Record<string, string | number | nul
 // 上传请求配置
 export interface UploadRequestOptions {
   action: string
-  method: string
-  data: any
-  headers: HeadersType
-  onError: (err: unknown) => void
-  onProgress: (evt: AxiosProgressEvent) => void
-  onSuccess: (response: any) => void
-  withCredentials: boolean
+  method?: string
+  data?: any
+  headers?: HeadersType
+  onError?: (err: unknown) => void
+  onProgress?: (evt: AxiosProgressEvent) => void
+  onSuccess?: (response: any) => void
+  withCredentials?: boolean
   // 分块上传，每块的大小，<=0则不分块
   chunkSize?: number
   // 文件
@@ -40,8 +40,11 @@ const abortMap = new WeakMap<File, AbortController>()
  * 转换请求头
  * @param headers 请求头
  */
-function transformHeaders(headers: HeadersType): AxiosHeaders {
+function transformHeaders(headers?: HeadersType): AxiosHeaders {
   const axiosHeaders = new AxiosHeaders()
+  if (!headers)
+    return axiosHeaders
+
   if (headers instanceof Headers) {
     headers.forEach((value, key) => {
       headers.append(key, value)
@@ -68,7 +71,7 @@ function uploadRequest(options: UploadRequestOptions) {
   abortMap.set(rawFile instanceof FileChunk ? rawFile.raw : rawFile, controller)
 
   const config: AxiosRequestConfig = {
-    method: 'post',
+    method: options.method ?? 'post',
     url: options.action,
     data: {
       ...options.data,
@@ -118,7 +121,7 @@ async function uploadFileChunk(options: UploadRequestOptions) {
         file: chunk,
         onProgress: (e) => {
           progressLoaded = e.loaded
-          options.onProgress({
+          options.onProgress?.({
             ...e,
             loaded: (progressTotal + progressLoaded),
             total: rawFile.size,
@@ -130,10 +133,10 @@ async function uploadFileChunk(options: UploadRequestOptions) {
       progressTotal += progressLoaded
       // 上传完成
       if (progressTotal >= rawFile.size)
-        options.onSuccess(res)
+        options.onSuccess?.(res)
     }
     catch (err) {
-      options.onError(err)
+      options.onError?.(err)
       break
     }
   }
