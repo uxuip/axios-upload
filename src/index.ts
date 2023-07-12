@@ -52,7 +52,7 @@ function transformHeaders(headers?: HeadersType): AxiosHeaders {
   }
   else {
     Object.entries(headers).forEach(([key, value]) => {
-      axiosHeaders.append(key, value)
+      axiosHeaders.set(key, value)
     })
   }
   return axiosHeaders
