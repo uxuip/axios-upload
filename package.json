@@ -1,6 +1,6 @@
 {
   "name": "@uxuip/axios-upload",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "packageManager": "pnpm@7.32.0",
   "description": "Axios upload file.",
   "author": "uxuip",
